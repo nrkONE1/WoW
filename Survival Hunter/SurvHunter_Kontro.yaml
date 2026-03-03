@@ -32,7 +32,6 @@ config:
       - label: "Pet 5"
         value: 4
     default: 0
-  # Defensive Settings
   survival_of_the_fittest_hp_pct:
     label: "Survival of the Fittest HP %"
     type: slider
@@ -59,17 +58,14 @@ config:
     default: 10
 
 variables:
-    #features
     auto_swap: config.features.has(2)
     pre_combat_usage: config.features.has(0)
     misdirect_usage: config.features.has(1)
-    #pets
     call_pet1: config.pets.has(0)
     call_pet2: config.pets.has(1)
     call_pet3: config.pets.has(2)
     call_pet4: config.pets.has(3)
     call_pet5: config.pets.has(4)
-    #defensives
     survival_of_the_fittest_hp_pct: config.survival_of_the_fittest_hp_pct
     roar_of_sacrifice_hp_pct: config.roar_of_sacrifice_hp_pct
     exhilaration_hp_pct: config.exhilaration_hp_pct
@@ -87,21 +83,19 @@ lists:
     - exhilaration,if=health.pct<=exhilaration_hp_pct
 
   interrupts:
-      # Primary Interrupt
     - muzzle,name="Interrupt Target",if=config.interrupt_target&((config.interrupt_all&target.casting.interruptible)|interrupts.target.ready)&target.casting.elapsed>=0.2&(target.casting.remains<1|target.channeling)
     - muzzle.mouseover,name="Interrupt Mouseover",if=config.interrupt_mouseover&((config.interrupt_all&mouseover.casting.interruptible)|interrupts.mouseover.ready)&interrupts.mouseover.ready&mouseover.casting.elapsed>=0.2&(mouseover.casting.remains<1|mouseover.channeling)
     - muzzle.focus,name="Interrupt Focus",if=config.interrupt_focus&((config.interrupt_all&focus.casting.interruptible)|interrupts.focus.ready)&interrupts.focus.ready&focus.casting.elapsed>=0.2&(focus.casting.remains<1|focus.channeling)
-       # CC Interrupt
     - intimidation,name="Stun Interrupt Target",if=interrupts.target.stun.ready&target.casting.elapsed>=0.1
-    - target_enemy,delay=100name="auto_target Stun",if=(interrupts.5y.stun.ready|interrupts.5y.stun.count>=1)&!interrupts.target.stun.ready&cooldown.intimidation.ready<1&enemies.inrange(5)>=1&var.auto_swap
-    - target_enemy,delay=100,name="auto_target Interrupt",if=(interrupts.5y.ready|interrupts.5y.count>=1)&!interrupts.target.ready&cooldown.muzzle.remais<1&enemies.inrange(5)>=1&var.auto_swap
+    - target_enemy,delay=100,name="auto_target Stun",if=(interrupts.5y.stun.ready|interrupts.5y.stun.count>=1)&!interrupts.target.stun.ready&cooldown.intimidation.ready<1&enemies.inrange(5)>=1&var.auto_swap
+    - target_enemy,delay=100,name="auto_target Interrupt",if=(interrupts.5y.ready|interrupts.5y.count>=1)&!interrupts.target.ready&cooldown.muzzle.remains<1&enemies.inrange(5)>=1&var.auto_swap
 
   pre_combat:
     - hunters_mark,if=nameplates.debuff.hunters_mark.count=0
     - misdirection,ignore_usable=true,range_check=none,if=!buff.misdirection.up
 
-  pet_stuff: 
-    - mend_pet,if=pet.health.pct<40 
+  pet_stuff:
+    - mend_pet,if=pet.health.pct<40
     - revive_pet,if=!pet.alive
     - call_pet_1,ignore_usable=true,range_check=none,if=!pet.exists&var.call_pet1
     - call_pet_2,ignore_usable=true,range_check=none,if=!pet.exists&var.call_pet2
@@ -122,6 +116,7 @@ lists:
     - raptor_strike,if=buff.tip_of_the_spear.up&buff.raptor_swipe.up|!buff.raptor_swipe.up
     - kill_command
     - hatchet_toss
+
   pl_apl_aoe:
     - kill_command,if=buff.tip_of_the_spear.stack=0|(buff.tip_of_the_spear.stack<2&buff.howl_of_the_pack_leader.up)
     - kill_command,if=cooldown.takedown.remains<gcd&buff.tip_of_the_spear.stack<2&!talent.twin_fangs
@@ -133,6 +128,7 @@ lists:
     - raptor_strike,if=(buff.tip_of_the_spear.up&buff.raptor_swipe.up)|!buff.raptor_swipe.up
     - kill_command
     - hatchet_toss
+
   sent_apl_st:
     - kill_command,if=buff.tip_of_the_spear.stack=0
     - boomstick,if=buff.tip_of_the_spear.up
@@ -145,6 +141,7 @@ lists:
     - raptor_strike,if=(buff.tip_of_the_spear.up&buff.raptor_swipe.up)|!buff.raptor_swipe.up
     - kill_command
     - hatchet_toss
+
   sent_apl_aoe:
     - kill_command,if=buff.tip_of_the_spear.stack=0
     - boomstick,if=buff.tip_of_the_spear.up
@@ -157,6 +154,7 @@ lists:
     - raptor_strike,if=(buff.tip_of_the_spear.up&buff.raptor_swipe.up)|!buff.raptor_swipe.up
     - kill_command
     - hatchet_toss
+
   main:
     - call_action_list,name=spell_queue
     - call_action_list,name=pet_stuff,if=state.rotation&!player.mounted
@@ -168,8 +166,7 @@ lists:
     - call_action_list,name=auto_target
     - call_action_list,name=defensives
     - call_action_list,name=self_heals
-    - call_action_list,name=pl_apl_aoe, if=active_enemies>2&talent.howl_of_the_pack_leader
-    - call_action_list,name=pl_apl_st, if=talent.howl_of_the_pack_leader
-    - call_action_list,name=sent_apl_aoe, if=active_enemies>2
+    - call_action_list,name=pl_apl_aoe,if=active_enemies>2&talent.howl_of_the_pack_leader
+    - call_action_list,name=pl_apl_st,if=talent.howl_of_the_pack_leader
+    - call_action_list,name=sent_apl_aoe,if=active_enemies>2
     - call_action_list,name=sent_apl_st
-
